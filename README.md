@@ -3,14 +3,17 @@ Script to automate task of trying a looted private key across hosts and optional
 
 
 ./SSHpray.py -h
-usage: SSHpray.py [-h] [-i 127.0.0.1] [-k <keyfile>] [-t <targetfile>]
-                  [-u <username>] [-v]
+usage: SSHpray.py [-h] [-c <command>] [-i <ip address>] [-k <keyfile>]
+                  [-t <targetfile>] [-u <username>] [-v]
 
 optional arguments:
 
   -h, --help            show this help message and exit
   
-  -i 127.0.0.1, --ipaddress 127.0.0.1
+  -c <command>, --commands <command>
+                        command to run
+                        
+  -i <ip address>, --ipaddress <ip address>
                         single ip to test
                         
   -k <keyfile>, --keyfile <keyfile>
