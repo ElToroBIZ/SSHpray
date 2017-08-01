@@ -8,7 +8,7 @@ except Exception as e:
 
 
 
-class SSHitter():
+class SSHpray():
 
 	def __init__(self, args):
 
@@ -26,6 +26,8 @@ class SSHitter():
 		self.userName=None
 
 	def check_args(self):
+
+		print(self.args)
 
 		#require at least one argument
 		if not (self.args.targets or self.args.ipaddress):
@@ -187,7 +189,7 @@ def main():
 	args = parser.parse_args()
 
 
-	run = SSHitter(args)
+	run = SSHpray(args)
 	run.cls()
 	run.check_args()
 	run.connect()
