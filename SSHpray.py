@@ -125,7 +125,7 @@ class SSHitter():
 
 	def cls(self):
 		os.system('cls' if os.name == 'nt' else 'clear')
-		print('SSHitter started at: %s' % (time.strftime("%d/%m/%Y - %H:%M:%S")))
+		print('SSHpray started at: %s' % (time.strftime("%d/%m/%Y - %H:%M:%S")))
 
 
 
