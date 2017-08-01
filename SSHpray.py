@@ -169,7 +169,7 @@ class SSHpray():
 					stdin, stdout, stderr = ssh.exec_command(c)
 				
 					#server response not working for some reason
-					print ("[+] Server responded with: \n")
+					print ("[+] Server responded to %s with: \n" % c)
 
 					print (''.join(stdout.readlines()))
 					print('\n')
