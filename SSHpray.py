@@ -4,7 +4,7 @@
 try:
 	import argparse, os, re, signal, socket, sys, time, paramiko
 except Exception as e:
-	print('\n[!] Import(s) failed! ' +str(e))
+	print('\n[!] Import(s) failed! ' + str(e))
 
 
 
@@ -54,7 +54,8 @@ class SSHpray():
 			self.userName = self.args.username
 
 		if self.args.commands is not None:
-			self.remote_commands = ''.join(self.args.commands)
+			self.remote_commands=[]
+			self.remote_commands.append(''.join(self.args.commands))
 
 
 		#self.read_targets()
@@ -163,7 +164,7 @@ class SSHpray():
 
 				for c in self.remote_commands:
 
-					print('Running %s' % c)
+					#print('Running %s' % c)
 
 					stdin, stdout, stderr = ssh.exec_command(c)
 				
