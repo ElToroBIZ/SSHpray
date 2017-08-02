@@ -164,13 +164,16 @@ class SSHpray():
                     #server response not working for some reason
                     print ('[+] {} responded to {} with: \n'.format(t,c))
 
-                    #create 
+                    #create dir if missing
                     if not os.path.exists(self.loot_dir+'/'+str(t)):
                         os.makedirs(self.loot_dir+'/'+str(t))
 
-                    loot_file = str(t)+'_loot.txt'
+                    #save output to a file 
+                    with open(str(c.strip())+'_loot.txt', 'w') as loot_file:
+                        loot_file.writelines(''.join(stdout.readlines()))
+
                     print (''.join(stdout.readlines()))
-                    loot_file.writelines(''.join(stdout.readlines()))
+
 
                     print('\n')
                 ssh.close()
