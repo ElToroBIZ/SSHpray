@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 try:
-    import argparse, os, re, signal, socket, string, sys, time, paramiko
+    import argparse, os, re, signal, socket, string, subprocess, sys, time, paramiko
 except Exception as e:
     print('\n[!] Import(s) failed! ' + str(e))
 
