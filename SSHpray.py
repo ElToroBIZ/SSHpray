@@ -59,7 +59,7 @@ class SSHpray():
 			self.remote_commands.append(''.join(self.args.commands))
 
 		if self.args.delay is not None:
-			self.timeout = int(''.join(self.args.delay))
+			self.timeout = float(''.join(self.args.delay))
 
 
 		#self.read_targets()
