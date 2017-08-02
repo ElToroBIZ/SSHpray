@@ -175,7 +175,7 @@ class SSHpray():
                         os.makedirs(self.loot_dir+str(t))
 
                     #save output to a file 
-                    c = c.translate(None, '~!@#$%^&*()_+`-=[]\|/?.,<>')
+                    c = c.translate(None, '~!@#$%^&*()_+`-=[]\|/?.,:;<>')
                     with open(self.loot_dir+str(c)+'_loot.txt', 'w') as loot_file:
                         loot_file.writelines(''.join(stdout.readlines()))
 
