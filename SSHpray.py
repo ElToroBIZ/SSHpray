@@ -169,8 +169,8 @@ class SSHpray():
                     print ('[+] {} responded to {} with: \n'.format(t,c))
 
                     #create dir if missing
-                    if not os.path.exists(self.loot_dir+'/'+str(t)):
-                        os.makedirs(self.loot_dir+'/'+str(t))
+                    if not os.path.exists(self.loot_dir+str(t)):
+                        os.makedirs(self.loot_dir+str(t))
 
                     #save output to a file 
                     c = c.translate(None, '~!@#$%^&*()_+`-=[]\|/?.,<>')
