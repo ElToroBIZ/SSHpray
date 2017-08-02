@@ -13,17 +13,18 @@ class SSHpray():
 	def __init__(self, args):
 
 		#defaults
-		self.private_keys=[]
+		self.private_keys = []
 		self.args = args
-		self.verbose=False
+		self.verbose = False
 		self.version ='beta.08012017'
-		self.startTime=time.time()
-		self.reportDir='./reports/'
+		self.startTime = time.time()
+		self.reportDir = './reports/'
 		self.targetsFile = ''
 		self.targetList = []
-		self.targetSet=set()
-		self.domainResult=set()
-		self.userName=None
+		self.targetSet = set()
+		self.domainResult = set()
+		self.userName = None
+		self.timeout = int(5)
 
 
 		#command(s) to run
@@ -56,6 +57,9 @@ class SSHpray():
 		if self.args.commands is not None:
 			self.remote_commands=[]
 			self.remote_commands.append(''.join(self.args.commands))
+
+		if self.args.delay is not None:
+			self.timeout = int(''.join(self.args.delay))
 
 
 		#self.read_targets()
@@ -160,7 +164,7 @@ class SSHpray():
 
 				ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-				ssh.connect(t, username = self.args.username, key_filename = self.args.keyfile, timeout=5)
+				ssh.connect(t, username = self.args.username, key_filename = self.args.keyfile, timeout=self.timeout)
 
 				for c in self.remote_commands:
 
@@ -192,6 +196,7 @@ def main():
 	parser = argparse.ArgumentParser()
 
 	parser.add_argument('-c', '--commands', metavar='<command>', help='command to run')
+	parser.add_argument('-d', '--delay', metavar='5', help='set timeout delay, default is 5 seconds')
 	parser.add_argument('-i', '--ipaddress', metavar='<ip address>', help='single ip to test')
 	parser.add_argument('-k', '--keyfile', metavar='<keyfile>', help='private key that you have looted')
 	parser.add_argument('-t', '--targets', metavar='<targetfile>', help='list of ssh servers in a file, one per line')
