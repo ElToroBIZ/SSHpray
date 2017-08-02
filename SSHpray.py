@@ -25,7 +25,7 @@ class SSHpray():
 		#command(s) to run
 		self.remote_commands = ['cat /etc/passwd;','cat /etc/shadow;','uname -a;','w;','who -a;','exit']
 
-	def check_args(self):
+	def check_args(self, parser):
 
 		print(self.args)
 
@@ -161,7 +161,7 @@ def main():
 	args = parser.parse_args()
 	run = SSHpray(args)
 	run.cls()
-	run.check_args()
+	run.check_args(parser)
 	run.connect()
 
 if __name__ == '__main__':
