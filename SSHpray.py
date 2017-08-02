@@ -148,7 +148,7 @@ class SSHpray():
 			private_key = f.readlines()
 		print('[i] Using Private Key: {} '.format(self.args.keyfile))
 		for i, t in enumerate(self.target_set):
-			if self.args.verbose is True: print ('[i] Attempting to SSH to {}'.format(t) )
+			print ('[i] Attempting to SSH to {}'.format(t) )
 			try:#Initialize SSH session to host via paramiko and run the command contents
 				ssh = paramiko.SSHClient()
 				ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -164,7 +164,7 @@ class SSHpray():
 				ssh.close()
 				print ('[+] SSH Session to {} closed'.format(t))
 			except Exception as e:
-				print('[!] {:15} : {}'.format(t,e))
+				if self.args.verbose is True: print('[!] {:15} : {}'.format(t,e))
 				pass
 
 def main():
