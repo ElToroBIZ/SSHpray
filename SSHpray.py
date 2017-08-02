@@ -39,22 +39,23 @@ class SSHpray():
 
 	def check_args(self, parser):
 		#print version and supplied args if verbose
+		if self.args.verbose is True: print('[i] Version: {}\n[i] Options: {}'.format(self.version,parser.parse_args()))
 
-		if self.args.verbose is True: print('[i] Version: {}\n[i] You ran: {}'.format(self.version,sys.argv))
-
-		#require at least one argument
+		#require at least one argument to provide targets
 		if not (self.args.targets or self.args.ipaddress):
 		    print('\n[!] No scope provided, add a file with IPs with -f or IP address(es) with -i\n')
 		    parser.print_help()
 		    sys.exit(1)
 
-		#if a file is supplied and no ip is supplied, open it with read_targets
+		#if a file is supplied open it with read_targets function
 		if self.args.targets is not None:
 			print('[i] Opening targets file: {}'.format(self.args.targets))
 			self.targets_file = self.args.targets
+			#call read_targets function
 			self.read_targets()
-		else:
-			self.target_set.add(''.join(self.args.ipaddress))
+		
+		#if ip address isnt blank
+		if self.args.ipaddress is not None:	self.target_set.add(''.join(self.args.ipaddress))
 
 		if self.args.username is None:
 			self.user_name = os.getlogin()
@@ -80,21 +81,23 @@ class SSHpray():
 		for i,t in enumerate(self.target_list):
 			#test to see if its a valid ip using socket
 			try:
-				#print(socket.inet_aton(str(t))) 
+				#print(socket.inet_aton(str(t)))
+				#use socket to see if the current line is a valid IP 
 				socket.inet_aton(t)
 				#add to set
 				self.target_set.add(t)
-			#if the ip isnt valid
+			#if the ip isnt valid, according to socket..
 			except socket.error:
 				#tell them
 				print ('[!] Invalid IP address [ {} ] found on line {}... Fixing!'.format(t,i+1))
-				#fix the entries. this function will add resolved IPs to the targetSet
+				#fix the entries. this function will add resolved IPs to the target_set
 				self.fix_targets(t)
 			except Exception as e:
+				#print other errors
 				print(e)
 		
 		#finally do a regex on targetList to clean it up(remove non-ip addresses)
-		ipAddrRegex=re.compile("\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}")
+		ipAddrRegex=re.compile('\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}')
 		#only allow IP addresses--if it isnt'
 		if not ipAddrRegex.match(t):
 			#remove from targetList
@@ -135,7 +138,7 @@ class SSHpray():
 	
 	def cls(self):
 		os.system('cls' if os.name == 'nt' else 'clear')
-		print('SSHpray started at: {}'.format(time.strftime("%d/%m/%Y - %H:%M:%S")))
+		print('SSHpray started at: {}'.format(time.strftime('%d/%m/%Y - %H:%M:%S')))
 	
 	def connect(self):
 		signal.signal(signal.SIGINT, self.signal_handler)
@@ -143,22 +146,23 @@ class SSHpray():
 			private_key = f.readlines()
 		print('[i] Using Private Key: {} '.format(self.args.keyfile))
 		for i, t in enumerate(self.target_set):
-			if self.args.verbose is True: print ("[+] Attempting to SSH to {}".format(t) )
+			if self.args.verbose is True: print ('[i] Attempting to SSH to {}'.format(t) )
 			try:#Initialize SSH session to host via paramiko and run the command contents
 				ssh = paramiko.SSHClient()
 				ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 				ssh.connect(t, username = self.args.username, key_filename = self.args.keyfile, timeout=self.timeout)
+				print('[i] SUCCESS: {}'.format(t))
 				for c in self.remote_commands:
 					#print('Running {}'.formatc)
 					stdin, stdout, stderr = ssh.exec_command(c)
 					#server response not working for some reason
-					print ("[+] {} responded to {} with: \n".format(t,c))
+					print ('[+] {} responded to {} with: \n'.format(t,c))
 					print (''.join(stdout.readlines()))
 					print('\n')
 				ssh.close()
 				print ('[+] SSH Session to {} closed'.format(t))
 			except Exception as e:
-				print("[!] {:15} : {}".format(t,e))
+				print('[!] {:15} : {}'.format(t,e))
 				pass
 
 def main():
