@@ -145,7 +145,7 @@ class SSHpray():
 				ssh.close()
 				print ('[+] SSH Session to %s closed' % (t))
 			except Exception as e:
-				print("[!] Exception with host %s: %s" % (t,e))
+				print("[!] %-15s : %s" % (t,e))
 				pass
 
 def main():
