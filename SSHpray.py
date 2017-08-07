@@ -18,7 +18,7 @@ class SSHpray():
         #verbosity explicitly off
         self.verbose = False
         #version
-        self.version ='beta.08012017'
+        self.version ='beta.08_06_2017'
         #default 5 second timeout for ssh
         self.timeout = int(5)
         #eventually we'll support >1 key
@@ -78,9 +78,6 @@ class SSHpray():
         else:
             self.user_name = self.args.username
 
-
-
-
         if self.args.commands is not None:
             self.remote_commands=[]
             self.remote_commands.append(''.join(self.args.commands))
@@ -100,56 +97,31 @@ class SSHpray():
         for i,t in enumerate(self.target_list):
             #test to see if its a valid ip using socket
             try:
-                #print(socket.inet_aton(str(t)))
                 #use socket to see if the current line is a valid IP 
                 socket.inet_aton(t)
                 #add to set
                 self.target_set.add(t)
             #if the ip isnt valid, according to socket..
-            except socket.error:
+            except socket.error as e:
                 #tell them
+                print(e)
                 print ('[!] Invalid IP address [ {} ] found on line {}... Fixing!'.format(t,i+1))
+
                 #fix the entries. this function will add resolved IPs to the target_set
-                self.fix_targets(t)
+                pass
+                self.target_set.remove(t)
+
             except Exception as e:
                 #print other errors
                 print(e)
-        
-        #finally do a regex on targetList to clean it up(remove non-ip addresses)
-        ipAddrRegex=re.compile('\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}')
-        #only allow IP addresses--if it isnt'
-        if not ipAddrRegex.match(t):
-            #remove from targetList
-            if self.args.verbose is True:print('[v] Removing invalid IP {}'% t)
-            self.target_set.remove(t)
-        else:
-            #otherwise add to target set
-            self.target_set.add(t)
-        
+    
         #need to expand cidr and filter rfc1918, etc    
         #show user target set of unique IPs
         if self.args.verbose is True:print('[i] Reconciled target list:')
         if self.args.verbose is True:print(', '.join(self.target_set))
         print('[i] All targets are valid IP addresses')
     
-    def fix_targets(self, t):
-        #function to resolve hostnames in target file or hostnames stripped from URLs to ip addresses.
-        #handle full urls:
-        if re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', t):
-            parsed_uri = urlparse(t)
-            domain = '{uri.netloc}'.format(uri=parsed_uri)
-            if self.args.verbose is True:print('[i] Looking up IP for {}'.format(domain))
-            hostDomainCmd = subprocess.Popen(['dig', '+short', domain], stdout = PIPE)
-            #print('[i] IP address for {} found: {}'.format(t,hostDomainCmd.stdout.read().strip('\n')))
-            #for each line in the host commands output, add to a fixed target list
-            self.target_set.add(hostDomainCmd.stdout.read().strip('\n')) 
-        
-        #filter hostnames
-        else:
-            if self.args.verbose is True:print('[i] Looking up IP for hostname {}'.format(t))
-            #just resolve ip from hostname if no http:// or https:// in the entry
-            hostNameCmd = subprocess.Popen(['dig', '+short', t], stdout = PIPE)
-            self.target_set.add(hostNameCmd.stdout.read().strip('\n'))
+
     
     def signal_handler(self, signal, frame):
         print('You pressed Ctrl+C! Exiting...')
@@ -157,7 +129,7 @@ class SSHpray():
     
     def cls(self):
         os.system('cls' if os.name == 'nt' else 'clear')
-        print('SSHpray started at: {}'.format(time.strftime('%d/%m/%Y - %H:%M:%S')))
+        print('SSHpray started at: {}'.format(time.strftime('%m/%d/%Y - %H:%M:%S')))
     
     def connect(self):
 
