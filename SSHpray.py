@@ -35,10 +35,12 @@ class SSHpray():
         self.ssh_result = []
         #dump reports here
         self.report_dir = './reports/'
+        
         if not os.path.exists(self.report_dir):
             os.makedirs(self.report_dir)
         #loot dir
         self.loot_dir = './loot/'
+        
         if not os.path.exists(self.loot_dir):
             os.makedirs(self.loot_dir)
         #command(s) to run. assumes bash, this is probably a stupid assumption
@@ -99,8 +101,6 @@ class SSHpray():
         if self.args.verbose is True:print(', '.join(self.target_list))
         print('[i] All targets are valid IP addresses')
     
-
-    
     def signal_handler(self, signal, frame):
         print('You pressed Ctrl+C! Exiting...')
         sys.exit(0)
@@ -115,34 +115,38 @@ class SSHpray():
         pattern.sub('', string.printable)
 
         signal.signal(signal.SIGINT, self.signal_handler)
+
         with open(self.args.keyfile) as f:
             private_key = f.readlines()
+
         print('[i] Using Private Key: {} and username {}'.format(self.args.keyfile, self.user_name))
+        
         for i, t in enumerate(self.target_list):
+            
             if self.args.verbose is True: print ('[i] Attempting to SSH to {}'.format(t) )
+            
             try:#Initialize SSH session to host via paramiko and run the command contents
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(t, username = self.args.username, key_filename = self.args.keyfile, timeout=self.timeout)
                 print('[+] SUCCESS: {}'.format(t))
+                
                 for c in self.remote_commands:
                     #print('Running {}'.formatc)
                     stdin, stdout, stderr = ssh.exec_command(c)
                     #server response not working for some reason
                     print ('[+] {} responded to {} with: \n'.format(t,c))
-
                     output = ''.join(stdout.readlines())
                     print (output)
-
                     #create dir if missing
                     if not os.path.exists(self.loot_dir+str(t)):
                         os.makedirs(self.loot_dir+str(t))
 
                     #save output to a file 
                     c = c.translate(None, '~!@#$%^&*()_+`-=[]\|/?.,:;<>')
+                    
                     with open(self.loot_dir+t+'/'+str(c)+'_loot.txt', 'w') as loot_file:
                         loot_file.writelines(output)
-
 
                     print('\n')
                 ssh.close()
