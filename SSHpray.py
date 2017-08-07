@@ -91,9 +91,18 @@ class SSHpray():
         #open targets file
         with open(self.args.targets) as f:
             targets = f.readlines()
-            #add to target list, strip stuff
+            #for each line
             for x in targets:
-                self.target_list.append(x.strip())
+                #see if it's an ip address using socket
+                try:
+                    socket.inet_aton(x)
+                    #if so, add it
+                    self.target_list.append(x.strip())
+                #if not, don't
+                except socket.error:
+                    pass
+
+                
 
         #need to expand cidr and filter rfc1918, etc    
         #show user target set of unique IPs
