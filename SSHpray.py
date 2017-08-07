@@ -71,7 +71,7 @@ class SSHpray():
         
         #if ip address isnt blank
         if self.args.ipaddress is not None: 
-            self.target_set.add(''.join(self.args.ipaddress))
+            self.target_list.append(''.join(self.args.ipaddress))
 
         if self.args.username is None:
             self.user_name = os.getlogin()
@@ -92,33 +92,11 @@ class SSHpray():
             #add to target list, strip stuff
             for x in targets:
                 self.target_list.append(x.strip())
-        
-        #iterate through target_list
-        for i,t in enumerate(self.target_list):
-            #test to see if its a valid ip using socket
-            try:
-                #use socket to see if the current line is a valid IP 
-                socket.inet_aton(t)
-                #add to set
-                self.target_set.add(t)
-            #if the ip isnt valid, according to socket..
-            except socket.error as e:
-                #tell them
-                print(e)
-                print ('[!] Invalid IP address [ {} ] found on line {}... Fixing!'.format(t,i+1))
 
-                #fix the entries. this function will add resolved IPs to the target_set
-                pass
-                self.target_set.remove(t)
-
-            except Exception as e:
-                #print other errors
-                print(e)
-    
         #need to expand cidr and filter rfc1918, etc    
         #show user target set of unique IPs
         if self.args.verbose is True:print('[i] Reconciled target list:')
-        if self.args.verbose is True:print(', '.join(self.target_set))
+        if self.args.verbose is True:print(', '.join(self.target_list))
         print('[i] All targets are valid IP addresses')
     
 
@@ -139,14 +117,14 @@ class SSHpray():
         signal.signal(signal.SIGINT, self.signal_handler)
         with open(self.args.keyfile) as f:
             private_key = f.readlines()
-        print('[i] Using Private Key: {} '.format(self.args.keyfile))
-        for i, t in enumerate(self.target_set):
+        print('[i] Using Private Key: {} and username {}'.format(self.args.keyfile, self.user_name))
+        for i, t in enumerate(self.target_list):
             if self.args.verbose is True: print ('[i] Attempting to SSH to {}'.format(t) )
             try:#Initialize SSH session to host via paramiko and run the command contents
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(t, username = self.args.username, key_filename = self.args.keyfile, timeout=self.timeout)
-                print('[i] SUCCESS: {}'.format(t))
+                print('[+] SUCCESS: {}'.format(t))
                 for c in self.remote_commands:
                     #print('Running {}'.formatc)
                     stdin, stdout, stderr = ssh.exec_command(c)
